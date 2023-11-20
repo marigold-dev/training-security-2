@@ -1,0 +1,26 @@
+export type storage = set<address>;
+
+type ret = [list<operation>, storage];
+
+// Three entrypoints
+
+@view
+const hasCookies = (user: address, s: storage): bool => Set.mem(user, s);
+
+@entry
+const changeOwner = (newOwner: address, s: storage): ret =>
+    //TODO  check that caller = adminContract
+
+        [
+        list([]),
+        Set.add(Tezos.get_self_address(), Set.remove(newOwner, s))
+    ]
+
+@entry
+const addOwner = (newOwner: address, s: storage): ret =>
+    //TODO  check that caller = adminContract
+
+        [
+        list([]),
+        Set.add(newOwner, s)
+    ]

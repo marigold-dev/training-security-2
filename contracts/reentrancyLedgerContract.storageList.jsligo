@@ -1,0 +1,3 @@
+#import "reentrancyLedgerContract.jsligo" "Contract"
+
+const storage: Contract.storage = Set.empty;

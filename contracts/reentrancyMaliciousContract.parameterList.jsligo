@@ -1,0 +1,3 @@
+#import "reentrancyMaliciousContract.jsligo" "Contract"
+
+const default_parameter: parameter_of Contract = Attack();

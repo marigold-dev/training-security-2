@@ -1,0 +1,17 @@
+{
+  "name": "training-security-2",
+  "version": "1.0.0",
+  "description": "- replay attack : return same op 2 times on the result list !!! //TODO code",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@taqueria/plugin-ligo": "^0.45.0",
+    "@taqueria/plugin-octez-client": "^0.45.0",
+    "@taqueria/plugin-taquito": "^0.45.0"
+  }
+}

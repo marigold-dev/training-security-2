@@ -1,0 +1,38 @@
+export type storage = address;
+
+type ret = [list<operation>, storage];
+
+// Three entrypoints
+
+@entry
+const sellCookies = (_: unit, s: storage): ret => {
+    const userBalanceOpt =
+        Tezos.call_view("hasCookies", Tezos.get_sender(), s) as option<bool>;
+    return match(userBalanceOpt) {
+        when (None()):
+            failwith("user do not have cookies")
+        when (Some(found)):
+            do {
+                if (! found) failwith("user do not have cookies") else {
+                    const opTx =
+                        Tezos.transaction(
+                            unit,
+                            1000000mutez,
+                            Tezos.get_contract_with_error(
+                                Tezos.get_sender(),
+                                "Cannot find the user contract"
+                            )
+                        );
+                    const opChangeOwner =
+                        Tezos.transaction(
+                            Tezos.get_sender(),
+                            0mutez,
+                            Option.unopt(
+                                Tezos.get_entrypoint_opt("%changeOwner", s)
+                            )
+                        );
+                    return [list([opTx, opChangeOwner]), s];
+                }
+            }
+    }
+}

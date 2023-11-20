@@ -1,0 +1,135 @@
+#import "reentrancyLedgerContract.jsligo" "Ledger"
+
+#import "reentrancyOfferContract.jsligo" "Offer"
+
+#import "reentrancyMaliciousContract.jsligo" "Malicious"
+
+//util function
+
+const assert_failure = (result: test_exec_result, message: string): bool => {
+    return match(result) {
+        when (Success(_)):
+            false
+        when (Fail(tee)):
+            match(tee) {
+                when (Other(msg)):
+                    do { Test.log("ERROR Other : " + msg); return false }
+                when (Balance_too_low(_record)):
+                    do { Test.log("ERROR Balance_too_low"); return false }
+                when (Rejected(s)):
+                    do {
+                        Test.log(["expected error : ", message, " Actual : "]);
+                        Test.log(s[0]);
+                        return ((Test.eval(message)) == s[0])
+                    }
+            }
+    }
+};
+
+// reset state
+
+const _3 = Test.reset_state(2 as nat, list([]) as list<tez>);
+
+const baker = Test.nth_bootstrap_account(0);
+
+const sender: address = Test.nth_bootstrap_account(1);
+
+const _4 = Test.set_baker(baker);
+
+const _5 = Test.set_source(sender);
+
+/**
+  * DEPLOY LEDGER with sender having cookies
+  */
+
+const ledgerInitialStorage = Set.empty;
+
+const ledgerOrig =
+    Test.originate(contract_of(Ledger), ledgerInitialStorage, 0 as tez);
+
+const ledgerContract = Test.to_contract(ledgerOrig.addr);
+
+const _7 = Test.log("ledgerContract");
+
+const _8 = Test.log(ledgerContract);
+
+/**
+  * DEPLOY OFFER 
+  */
+
+const offerInitialStorage = Tezos.address(ledgerContract);
+
+const offerOrig =
+    Test.originate(contract_of(Offer), offerInitialStorage, 10000000mutez);
+
+const offerContract = Test.to_contract(offerOrig.addr);
+
+const _9 = Test.log("offerContract");
+
+const _10 = Test.log(offerContract);
+
+/**
+  * DEPLOY MALICIOUS 
+  */
+
+const maliciousInitialStorage = {
+    nbCalls: 2;
+    victimAddress: Tezos.address(offerContract)
+};
+
+const maliciousOrig =
+    Test.originate(contract_of(Malicious), maliciousInitialStorage, 0 as tez);
+
+const maliciousContract = Test.to_contract(maliciousOrig.addr);
+
+const _11 = Test.log("maliciousContract");
+
+const _12 = Test.log(maliciousContract);
+
+////////
+
+const _test = (): bool => {
+    Test.log("COOKIES OWNERS");
+    const st = (Test.get_storage(ledgerOrig.addr) as Ledger.storage);
+    Test.log(st);
+    Test.log("BALANCE OF SENDER");
+    Test.log(Test.get_balance_of_address(sender));
+    const status =
+        Test.transfer_to_contract(
+            Test.to_entrypoint("attack", maliciousOrig.addr),
+            unit,
+            1 as mutez
+        );
+    Test.log(status);
+    Test.log("AFTER RUN - BALANCE OF SENDER");
+    Test.log(Test.get_balance_of_address(sender));
+    const st1 = (Test.get_storage(ledgerOrig.addr) as Ledger.storage);
+    Test.log(st1);
+    /*Test.assert_with_error(
+        Option.unopt(Map.find_opt(s, st.votes)) == o,
+        "Cannot find vote"
+    );*/
+
+    return true
+};
+
+const _ = Test.log("admin initialize cookies to malicious KT1");
+
+const status =
+    Test.transfer_to_contract(
+        Test.to_entrypoint("addOwner", ledgerOrig.addr),
+        Test.to_address(maliciousOrig.addr),
+        0mutez
+    );
+
+const _2 = Test.log(status);
+
+const testReentrancy = _test();
+
+const _14 = Test.log("END RUN - BALANCE OF SENDER");
+
+const _13 = Test.log(Test.get_balance_of_address(sender));
+
+const st2 = (Test.get_storage(ledgerOrig.addr) as Ledger.storage);
+
+const _15 = Test.log(st2);

@@ -1,0 +1,8 @@
+#import "reentrancyMaliciousContract.jsligo" "Contract"
+
+const default_storage = {
+    nbCalls: 2;
+    victimAddress: "KT1TVRVzA4UnuSc5SVNkJ9LBrSYm1PcoARxT" as
+        address //offer
+
+};

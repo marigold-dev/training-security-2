@@ -1,0 +1,5 @@
+#import "reentrancyOfferContract.jsligo" "Contract"
+
+const default_storage: Contract.storage =
+    "KT1KLQLvWpsU7vLya6tnp4rWH5anS3hisMm8" as address; //ledger
+
