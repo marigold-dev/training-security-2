@@ -1,8 +1,8 @@
-#import "reentrancyLedgerContract.jsligo" "Ledger"
+#import "3-reentrancyLedgerContract.jsligo" "Ledger"
 
-#import "reentrancyOfferContract.jsligo" "Offer"
+#import "3-reentrancyOfferContract.jsligo" "Offer"
 
-#import "reentrancyMaliciousContract.jsligo" "Malicious"
+#import "3-reentrancyMaliciousContract.jsligo" "Malicious"
 
 //util function
 

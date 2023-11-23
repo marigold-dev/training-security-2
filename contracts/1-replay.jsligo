@@ -1,0 +1,17 @@
+export type storage = unit;
+
+type ret = [list<operation>, storage];
+
+@entry
+const replay = (_p: unit, _s: storage): ret => {
+  const op =
+    Tezos.transaction(
+      unit,
+      1mutez,
+      Tezos.get_contract_with_error(
+        Tezos.get_sender(),
+        "Cannot get sender's contract"
+      )
+    );
+  return [list([op, op, op, op]), unit]
+}

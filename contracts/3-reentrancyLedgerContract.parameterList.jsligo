@@ -1,4 +1,4 @@
-#import "reentrancyLedgerContract.jsligo" "Contract"
+#import "3-reentrancyLedgerContract.jsligo" "Contract"
 
 const default_parameter: parameter_of Contract =
     AddOwner("KT1TQyF4PWnnoGuuLUpzuHjo2PTFfK6rtsmy" as address);

@@ -1,4 +1,4 @@
-#import "reentrancyMaliciousContract.jsligo" "Contract"
+#import "3-reentrancyMaliciousContract.jsligo" "Contract"
 
 const default_storage = {
     nbCalls: 2;
