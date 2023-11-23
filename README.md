@@ -71,18 +71,23 @@ sequenceDiagram
   User->>MaliciousContract: deposit funds
   MaliciousContract->>LedgerContract: deposit funds
   User->>MaliciousContract: call withdraw
+  MaliciousContract->>LedgerContract: call withdraw
   Note right of LedgerContract: checkBalance
   Note right of LedgerContract: sendFunds
   LedgerContract->>MaliciousContract: sendFunds operation
-  Note right of MaliciousContract: loop calling withdraw ...
+  Note right of MaliciousContract: loop calling withdraw ... x times
   MaliciousContract->>LedgerContract: call withdraw
+  LedgerContract->>MaliciousContract: sendFunds operation  ... x times
   Note right of LedgerContract: ... Once finish ... UpdateBalance
 ```
 
-Why this scenario is not possible on Tezos ?
-On Tezos, the first transaction will update the state and will execute a list of operation at the end of execution. Next executions will encounter an updated state. On solidity the operation will call directly the smart contract like doing a stop, call a synchronous execution and continue the flow.
+Why this scenario is not possible on Solidity ?
+On Solidity, the operation will call directly the smart contract like doing a stop, call a synchronous execution and continue the flow.
 
-Let's implment a more complex scenario, now :
+Why this scenario is not possible on Tezos ?
+On Tezos, the first transaction will update the state and will execute a list of operation at the end of execution. Next executions will encounter an updated state
+
+Let's implement a more complex scenario, now :
 
 ```mermaid
 sequenceDiagram
@@ -108,6 +113,8 @@ sequenceDiagram
   OfferContract->>LedgerContract: call changeOwner
 ```
 
+The issue here is clearly that we send money without updating the state first
+
 &rarr; **SOLUTION** :
 
 - Mutex safeguard : The goal is to avoid that multiple internal operations are generated. A boolean `isRunning` will lock only one operation for the full transaction flow.
@@ -121,7 +128,7 @@ sequenceDiagram
 
 //TODO code + fix
 
-- Authorize withdraw transfer only to user account : As User wallet cannot do callback loops, it solves the issue but this solution is not always feasible and limitating.
+- Authorize withdraw transfer only to user account : As User wallet cannot do callback loops, it solves the issue but this solution is not always feasible and limitating. To check if an address is implicit, the Tezos.get_sender and the Tezos.get_source are always equal.
 
 - Audit External Contract calls : This is very hard to check, for example on withdraw for a token transfer, any contract can receive funds.
 
