@@ -1,3 +1,3 @@
-#import "reentrancyLedgerContract.jsligo" "Contract"
+#import "3-reentrancyLedgerContract.jsligo" "Contract"
 
 const storage: Contract.storage = Set.empty;

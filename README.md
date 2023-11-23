@@ -126,7 +126,112 @@ The issue here is clearly that we send money without updating the state first
 
 - Check-and-send pattern : Principle of separating state changes from external contract interactions. First, update the contract’s state, then interact with other contracts
 
-//TODO code + fix
+Compile/Run the hack test first
+
+```bash
+taq test 3-reentrancyTest.jsligo
+```
+
+The logs seems to be fine, but it is hard to guess the internal transactions and to separate the fees from the hack on the attacker balance
+
+```logs
+┌─────────────────────────┬─────────────────────────────────────────────┐
+│ Contract                │ Test Results                                │
+├─────────────────────────┼─────────────────────────────────────────────┤
+│ 3-reentrancyTest.jsligo │ "ledgerContract"                            │
+│                         │ KT1LQyTHEZeaecRj7hWgkzPEBD6vMEKXYzoo(None)  │
+│                         │ "offerContract"                             │
+│                         │ KT1M4nPCej4va4Q2iMPX2FKt8xLw5cfGjBv9(None)  │
+│                         │ "maliciousContract"                         │
+│                         │ KT1B7RgF6j7UpAybpdfxhLCp7hf41pNFcxyS(None)  │
+│                         │ "admin initialize cookies to malicious KT1" │
+│                         │ Success (1299n)                             │
+│                         │ "COOKIES OWNERS"                            │
+│                         │ {KT1B7RgF6j7UpAybpdfxhLCp7hf41pNFcxyS}      │
+│                         │ "BALANCE OF SENDER"                         │
+│                         │ 3799985579750mutez                          │
+│                         │ Success (1798n)                             │
+│                         │ "AFTER RUN - BALANCE OF SENDER"             │
+│                         │ 3799984579749mutez                          │
+│                         │ {KT1LQyTHEZeaecRj7hWgkzPEBD6vMEKXYzoo}      │
+│                         │ "END RUN - BALANCE OF SENDER"               │
+│                         │ 3799984579749mutez                          │
+│                         │ {KT1LQyTHEZeaecRj7hWgkzPEBD6vMEKXYzoo}      │
+│                         │ Everything at the top-level was executed.   │
+│                         │ - testReentrancy exited with value true.    │
+│                         │                                             │
+│                         │ 🎉 All tests passed 🎉                      │
+└─────────────────────────┴─────────────────────────────────────────────┘
+```
+
+To have a better vizualization of the hack, the contract should be deployed
+
+Compile the first contract, the Ledger contract, and deploy it
+
+```bash
+taq compile 3-reentrancyLedgerContract.jsligo
+taq deploy 3-reentrancyLedgerContract.tz -e testing
+```
+
+Copy the contract address, in my case KT1BJZfhC459WqCVJzPmu3vJSWFFkvyi9k1u, and paste it on the file `3-reentrancyOfferContract.storageList.jsligo` with your value
+
+Compile/deploy the second contract, the Offer contract, putting some money on the contract for the thieves
+
+```bash
+taq compile 3-reentrancyOfferContract.jsligo
+taq deploy 3-reentrancyOfferContract.tz -e testing --mutez 10000000
+```
+
+Copy the contract address, in my case KT1CHJgXEdBPktNNPGTDaL8XEAzJV9fjSkrZ, and paste it on the file `3-reentrancyMaliciousContract.storageList.jsligo` with your value
+
+Compile/deploy the last contract, the Malicious contract who will loop and steal the funds of the Offer contract
+
+```bash
+taq compile 3-reentrancyMaliciousContract.jsligo
+taq deploy 3-reentrancyMaliciousContract.tz -e testing
+```
+
+Copy the contract address, in my case KT1NKLZE9HkGJxjopowLqxA4pswutgMrrXyE, and initialize the Ledger contract as the Malicious contract as some cookies. Paste the value in the file `3-reentrancyLedgerContract.parameterList.jsligo`
+
+Once done, compile the Ledger contracts and call with this parameter
+
+```bash
+taq compile 3-reentrancyLedgerContract.jsligo
+taq call 3-reentrancyLedgerContract --param 3-reentrancyLedgerContract.parameter.default_parameter.tz -e testing
+```
+
+Context is ready :
+
+- the Malicious contract has cookies on the Ledger contract
+- all deployed contract points to the correct addresses
+
+Now the Malicious contract will try to steal funds from the Offer contract, run the command to start the attack the transaction flow
+
+```bash
+octez-client transfer 0 from alice to KT1NKLZE9HkGJxjopowLqxA4pswutgMrrXyE --entrypoint attack --arg 'Unit' --burn-cap 1
+```
+
+Here you can see the result on the Ghostnet : https://ghostnet.tzkt.io/KT1NKLZE9HkGJxjopowLqxA4pswutgMrrXyE/operations/
+
+3 refunds will be emitted instead of one
+
+&rarr; **SOLUTION** : on the `3-reentrancyOfferContract.jsligo` file, line 34, swap the order of operation execution
+
+from
+
+```
+return [list([opTx, opChangeOwner]), s];
+```
+
+to
+
+```
+return [list([opChangeOwner,opTx]), s];
+```
+
+and rerun the scenario from scratch redeploying the contracts
+
+//FIXME retry myself ... to be sure it works well
 
 - Authorize withdraw transfer only to user account : As User wallet cannot do callback loops, it solves the issue but this solution is not always feasible and limitating. To check if an address is implicit, the Tezos.get_sender and the Tezos.get_source are always equal.
 

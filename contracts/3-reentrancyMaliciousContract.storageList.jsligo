@@ -2,7 +2,7 @@
 
 const default_storage = {
     nbCalls: 2;
-    victimAddress: "KT1TVRVzA4UnuSc5SVNkJ9LBrSYm1PcoARxT" as
+    victimAddress: "KT1CHJgXEdBPktNNPGTDaL8XEAzJV9fjSkrZ" as
         address //offer
 
 };
