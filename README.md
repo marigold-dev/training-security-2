@@ -229,9 +229,11 @@ to
 return [list([opChangeOwner,opTx]), s];
 ```
 
-and rerun the scenario from scratch redeploying the contracts
+and rerun the scenario from scratch redeploying the contracts. IT should be impossible to run the attack, as the transaction will fail
 
-//FIXME retry myself ... to be sure it works well
+```logs
+"message":"user do not have cookies"
+```
 
 - Authorize withdraw transfer only to user account : As User wallet cannot do callback loops, it solves the issue but this solution is not always feasible and limitating. To check if an address is implicit, the Tezos.get_sender and the Tezos.get_source are always equal.
 
@@ -241,12 +243,15 @@ and rerun the scenario from scratch redeploying the contracts
 
 4. Overflow
 
-There is no SafeMath in ligo . Do not confuse with https://packages.ligolang.org/package/@ligo/math-lib that is to manipulate float instead or multiply/deivide by 10^6. For the nat, int, and timestamp types, the Michelson interpreter uses arbitrary-precision arithmetic provided by the OCaml Zarith library. It means that their size is only limited by gas or storage limits. You can store huge numbers in a contract without reaching the limit
+Manipulating arithmetic operation can lead to overflows and underflows
 
-&rarr; **SOLUTION** : do operation on int or nat instead of tez as it has larger values
+- On Solidity : SafeMath is a library in Solidity that was designed to provide safe mathematical operations. It prevents overflow and underflow errors when working with unsigned integers (uint), which can lead to unexpected behavior in smart contracts. However since Solidity v0.8.0, this library has been made obsolete as the language itself starts to include internal checking.
 
-5. frontRunning / MEV : It can be done by the baker itself as the list is known in advance at each period ... or any bots litening to the gossip network ...
+- On Ligo : For the nat, int, and timestamp types, the Michelson interpreter uses arbitrary-precision arithmetic provided by the [OCaml Zarith library](https://github.com/ocaml/Zarith). It means that their size is only limited by gas or storage limits. You can store huge numbers in a contract without reaching the limit. However, in LIGO, an overflow will cause the contract to fail.
 
-- buy before big BUY TX , sell token after === sandwich attack
-- BOT : whataver increase user balance, you just copy with higher fees to pass first
-- BAKER : just change the order
+&rarr; **SOLUTION** :
+
+- For large Tez values, do operation on int or nat as it has larger memory values
+- There is no other solution than using types with larger values as the default behavior is to reject the transaction in case of overflow
+
+> Do not confuse with [Ligo MathLib library](https://packages.ligolang.org/package/@ligo/math-lib) providing manipulation of floats and rationals instead of using basic types.
