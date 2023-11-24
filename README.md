@@ -12,7 +12,7 @@ taq compile 1-replay.jsligo
 taq simulate 1-replay.tz --param=1-replay.parameter.parameter.tz
 ```
 
-The simulation will tell you thatseveral internal transaction will be executed.
+The simulation will tell you that several internal transaction will be executed.
 But if you deploy the code and try to really execute it :
 
 ```bash
@@ -50,17 +50,17 @@ You can have a look on the Ligo implementation of fa1.2 on the Ligo registry [he
 
 The code respect the Standard but you can see that the [Allowance type is actually a map](https://github.com/frankhillard/ligoFA12/blob/main/lib/asset/allowance.mligo#L3C8-L3C8). It would have been better to change the Standard and use a `big_map` instead a `map`. If you implement the Standard differently, then your smart contract storage definition and entrypoint signatures will not match anymore and will not be supported by other platforms
 
-3. Reentrancy
+3. Re-entrancy
 
 These attacks allow an attacker to repeatedly call a contract function in a way that drains the contract’s resources, leading to a denial of service (DoS) attack
 
-One of the most well-known examples of a reentrancy attack occurred in 2016, when an attacker exploited a vulnerability in the DAO (Decentralized Autonomous Organization) contract on the Ethereum blockchain. But this popular hack is still actively used :
+One of the most well-known examples of a re-entrancy attack occurred in 2016, when an attacker exploited a vulnerability in the DAO (Decentralized Autonomous Organization) contract on the Ethereum blockchain. But this popular hack is still actively used :
 
-- Uniswap/Lendf.Me hacks (April 2020) – $25 mln, attacked by a hacker using a reentrancy.
-- The BurgerSwap hack (May 2021) – $7.2 mln, because of a fake token contract and a reentrancy exploit.
-- The SURGEBNB hack (August 2021) – $4 mln, seems to be a reentrancy-based price manipulation attack.
-- CREAM FINANCE hack (August 2021) – $18.8 mln, reentrancy vulnerability allowed the exploiter for the second borrow.
-- Siren protocol hack (September 2021) – $3.5 mln, AMM pools were exploited through reentrancy attack.
+- Uniswap/Lendf.Me hacks (April 2020) – $25 mln, attacked by a hacker using a re-entrancy.
+- The BurgerSwap hack (May 2021) – $7.2 mln, because of a fake token contract and a re-entrancy exploit.
+- The SURGEBNB hack (August 2021) – $4 mln, seems to be a re-entrancy-based price manipulation attack.
+- CREAM FINANCE hack (August 2021) – $18.8 mln, re-entrancy vulnerability allowed the exploiter for the second borrow.
+- Siren protocol hack (September 2021) – $3.5 mln, AMM pools were exploited through re-entrancy attack.
 
 This kind of attack is quite simple to put in place with Solidity the way it works.
 
@@ -164,7 +164,7 @@ The logs seems to be fine, but it is hard to guess the internal transactions and
 └─────────────────────────┴─────────────────────────────────────────────┘
 ```
 
-To have a better vizualization of the hack, the contract should be deployed
+To have a better visualization of the hack, the contract should be deployed
 
 Compile the first contract, the Ledger contract, and deploy it
 
@@ -235,7 +235,7 @@ and rerun the scenario from scratch redeploying the contracts. IT should be impo
 "message":"user do not have cookies"
 ```
 
-- Authorize withdraw transfer only to user account : As User wallet cannot do callback loops, it solves the issue but this solution is not always feasible and limitating. To check if an address is implicit, the Tezos.get_sender and the Tezos.get_source are always equal.
+- Authorize withdraw transfer only to user account : As User wallet cannot do callback loops, it solves the issue but this solution is not always feasible and limiting. To check if an address is implicit, the Tezos.get_sender and the Tezos.get_source are always equal.
 
 - Audit External Contract calls : This is very hard to check, for example on withdraw for a token transfer, any contract can receive funds.
 
